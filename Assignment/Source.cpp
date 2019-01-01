@@ -32,6 +32,7 @@ float capeAngle = 0, capeX = 1, capeY = 0, capeZ= 0;
 GLuint* textures = new GLuint[4];
 BITMAP image[4];
 
+
 float lowerllegAngle = 90;
 
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
