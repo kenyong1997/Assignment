@@ -25,6 +25,10 @@ HBITMAP hBMP = NULL;
 
 float lowerleftlegx=-0.15, lowerleftlegy=-0.3, lowerleftlegz=0;
 float lowerrightlegx = 0.15, lowerrightlegy = -0.3, lowerrightlegz = 0;
+float rightleglogox = 0, rightleglogoy = 0, rightleglogoz = 0;
+float leftleglogox = 0, leftleglogoy = 0, leftleglogoz = 0;
+float rotateCam = 0;
+float capeAngle = 0, capeX = 1, capeY = 0, capeZ= 0;
 GLuint* textures = new GLuint[4];
 BITMAP image[4];
 
@@ -42,8 +46,86 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		if (wParam == VK_ESCAPE) PostQuitMessage(0);
 		else if (wParam == VK_LEFT) {
 			
+		
+
+			if (rotateCam <= 90) {
+				rotateCam += 1;
+				if (capeAngle < 10){
+				capeAngle += 1;
+				capeY = -0.1;
+				capeZ = -0.1;
+				}
+			}
+			else {
+				while (capeAngle != 0) {
+					capeAngle = 0;
+					capeY = 0;
+					capeZ = 0;
+				}
+				
+			}
+			if (upperLegAngle == 30) {
+				upperlegcond = false;
+				
+			}
+			else if (upperLegAngle == -30)
+			{
+				upperlegcond = true;
+			}
+			if (upperlegcond) {
+
+				
+
+				upperLegAngle += 10;
+
+				lowerleftlegy += 0.01;
+				lowerleftlegz += 0.06;
+				leftleglogoy += 0.01;
+				leftleglogoz += 0.06;
+
+				lowerrightlegy -= 0.01;
+				lowerrightlegz -= 0.06;
+				rightleglogoy -= 0.01;
+				rightleglogoz -= 0.06;
+
+
+			}
+			else
+			{
+				
+				upperLegAngle -= 10;
+
+				lowerleftlegy -= 0.01;
+				lowerleftlegz -= 0.06;
+				leftleglogoy -= 0.01;
+				leftleglogoz -= 0.06;
+
+				lowerrightlegy += 0.01;
+				lowerrightlegz += 0.06;
+				rightleglogoy += 0.01;
+				rightleglogoz += 0.06;
+
+
+			}
 		}
 		else if (wParam == VK_RIGHT) {
+			if (rotateCam >= -90) {
+				rotateCam -= 1;
+				if (capeAngle < 10) {
+					capeAngle += 1;
+					capeY = -0.1;
+					capeZ = -0.1;
+				}
+			}
+			else {
+				while (capeAngle != 0) {
+					capeAngle -= 0.5;
+					capeY = 0;
+					capeZ = 0;
+				}
+
+			}
+
 			if (upperLegAngle == 30 ) {
 				upperlegcond = false;
 				
@@ -54,38 +136,31 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			}
 			if (upperlegcond) {
 				upperLegAngle += 10;
-				lowerleftlegy += 0.05;
+				lowerleftlegy += 0.01;
 				lowerleftlegz += 0.06;
+				leftleglogoy += 0.01;
+				leftleglogoz += 0.06;
 
+				lowerrightlegy -= 0.01;
+				lowerrightlegz -= 0.06;
+				rightleglogoy -= 0.01;
+				rightleglogoz -= 0.06;
 
-				if (upperLegAngle >= 0) {
-					lowerrightlegy += 0.05;
-					lowerrightlegz -= 0.06;
-					if (upperLegAngle == 30) {
-						lowerlegcond = false;
-					}
-				}
-				if(!lowerlegcond){
-					lowerrightlegy -= 0.05;
-					lowerrightlegz += 0.06;
-				
-				}
+			
 			}
 			else
 			{
 				upperLegAngle -= 10;
-					lowerleftlegy -= 0.05;
-					lowerleftlegz -= 0.06;
-					if (upperLegAngle  >=0) {
+				lowerleftlegy -= 0.01;
+				lowerleftlegz -= 0.06;
+				leftleglogoy -= 0.01;
+				leftleglogoz -= 0.06;
 
-						lowerrightlegy -= 0.05;
-						lowerrightlegz -= 0.06;
-					}
-					else {
-
-						lowerrightlegy -= 0.05;
-						lowerrightlegz += 0.06;
-					}
+				lowerrightlegy += 0.01;
+				lowerrightlegz += 0.06;
+				rightleglogoy += 0.01;
+				rightleglogoz += 0.06;
+					
 				
 			}
 				
@@ -204,10 +279,12 @@ void duke_foot_logo_ring() {
 }
 void duke_foots_logo() {
 	glPushMatrix();
+	glTranslatef(rightleglogox, rightleglogoy, rightleglogoz);
 	duke_foot_logo();
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-0.3, 0, 0);
+	glTranslatef(leftleglogox, leftleglogoy, leftleglogoz);
 	duke_foot_logo();
 	glPopMatrix();
 }
@@ -216,12 +293,14 @@ void duke_logo_ring() {
 	glColor3f((float)255 / 255, (float)255 / 255, (float)0 / 255);
 	glPushMatrix();
 	glTranslatef(0.15, -0.3, 0);
+	glTranslatef(rightleglogox, rightleglogoy, rightleglogoz);
 	glRotatef(180, 0, 1, 1);
 	duke_foot_logo_ring();
 	glLoadIdentity();
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-0.15, -0.3, 0);
+	glTranslatef(leftleglogox, leftleglogoy, leftleglogoz);
 	glRotatef(180, 0, 1, 1);
 	duke_foot_logo_ring();
 	glLoadIdentity();
@@ -373,7 +452,17 @@ void duke_foot() {
 
 	glDisable(GL_TEXTURE_2D);
 }
-
+void duke_foots() {
+	glPushMatrix();
+	glTranslatef(rightleglogox, rightleglogoy, rightleglogoz);
+	duke_foot();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-0.3, 0, 0);
+	glTranslatef(leftleglogox, leftleglogoy, leftleglogoz);
+	duke_foot();
+	glPopMatrix();
+}
 void duke_waist() {
 	glBegin(GL_QUADS);
 	glColor3f((float)255 / 255, (float)255 / 255, (float)255 / 255);
@@ -1103,18 +1192,24 @@ void duke_head() {
 }
 
 void duke_left_hand() {
+	
+	//glRotatef(-90, 1, 0, 0);
+
 	glPushMatrix();
 	glTranslatef(-0.4, 0.5, 0);
 	duke_shoulder();
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslatef(0.8, 0, 0);
 	duke_arm();
 	glPopMatrix();
+	
 
 	glPushMatrix();
 	duke_weaapon();
 	glPopMatrix();
+	
 }
 
 void duke_right_hand() {
@@ -1124,7 +1219,6 @@ void duke_right_hand() {
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(0.8, 0, 0);
 	duke_arm();
 	glPopMatrix();
 
@@ -1134,15 +1228,7 @@ void duke_right_hand() {
 	glPopMatrix();
 }
 
-void duke_foots() {
-	glPushMatrix();
-	duke_foot();
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-0.3, 0, 0);
-	duke_foot();
-	glPopMatrix();
-}
+
 
 
 
@@ -1185,9 +1271,11 @@ void duke_body() {
 
 void duke_cape() {
 	glEnable(GL_TEXTURE_2D);
-
+	
 	glBegin(GL_QUADS);
+	
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
+	
 	glColor3f(1, 0, 0);
 	//front
 	glTexCoord2f(0.0f, 1.0f);
@@ -1198,7 +1286,7 @@ void duke_cape() {
 	glVertex3f(0.3, -0.3, -0.3);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-0.3, -0.3, -0.3);
-	
+
 	glEnd();
 
 	glBegin(GL_QUADS);
@@ -1227,24 +1315,28 @@ void display()
 	//--------------------------------
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear background colour (default : black)
 	glEnable(GL_DEPTH_TEST);
-	glRotatef(0.5, 0, 1, 0);
+	glLoadIdentity();
+	//glRotatef(180, 0, 1, 0);
+	glRotatef(rotateCam, 0, 1, 0);//rotateCam
 
 	duke_lower_legs();
 	glPushMatrix();
-	//glRotatef(rotateCam, 1, 0, 0);
 	duke_upper_legs();
 	glPopMatrix();
 	duke_foots();
-	//duke_foots_logo();
 	duke_waist();
 	duke_belt();
-	//duke_logo_ring();
 	duke_body();
 	duke_head();
 	duke_corn();
 	duke_left_hand();
 	duke_right_hand();
+
+	glPushMatrix();
+	glRotatef(capeAngle, 1, 0, 0);
+	glTranslatef(0,capeY,capeZ);
 	duke_cape();
+	glPopMatrix();
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
