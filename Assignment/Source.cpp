@@ -59,7 +59,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lowerleftlegy += 0.05;
 				lowerleftlegz += 0.06;
 
-			
 
 				if (upperLegAngle >= 0) {
 					lowerrightlegy += 0.05;
