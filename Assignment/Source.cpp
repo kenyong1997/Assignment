@@ -24,7 +24,6 @@ GLuint texture = 0;
 BITMAP BMP;
 HBITMAP hBMP = NULL;
 
-
 float lowerleftlegx=-0.15, lowerleftlegy=-0.3, lowerleftlegz=0;
 float lowerrightlegx = 0.15, lowerrightlegy = -0.3, lowerrightlegz = 0;
 GLuint* textures = new GLuint[4];
