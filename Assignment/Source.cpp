@@ -1472,6 +1472,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	loadTexture(textures[2], "mGold.bmp");
 	loadTexture(textures[3], "mMetal.bmp");
 
+
 	while (true)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
