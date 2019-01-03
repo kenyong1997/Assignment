@@ -16,19 +16,25 @@ double rotateBi = 90, rotateBii = -90;
 double upperLegAngle = 0;
 
 float amb[] = { 1,1,1,0 };
-float diff[] = { (float)30/255,(float)144/255,(float)255/255,0 };
+float diff[] = { (float)30 / 255,(float)144 / 255,(float)255 / 255,0 };
 float pos[] = { 1,1,1 };
-boolean upperlegcond = true, lowerlegcond= true;
+boolean upperlegcond = true, lowerlegcond = true;
 GLuint texture = 0;
 BITMAP BMP;
 HBITMAP hBMP = NULL;
 
-float lowerleftlegx=-0.15, lowerleftlegy=-0.3, lowerleftlegz=0;
+float lowerleftlegx = -0.15, lowerleftlegy = -0.3, lowerleftlegz = 0;
 float lowerrightlegx = 0.15, lowerrightlegy = -0.3, lowerrightlegz = 0;
 float rightleglogox = 0, rightleglogoy = 0, rightleglogoz = 0;
 float leftleglogox = 0, leftleglogoy = 0, leftleglogoz = 0;
+
+float shieldhandx = 0.4, shieldhandy = 0.5, shieldhandz = 0;
+float shieldx = -0.5, shieldy = -0.04, shieldz = 0;
+
+float shieldrotatecamy = 0;
+float shieldrotatecamx = 0;
 float rotateCam = 0;
-float capeAngle = 0, capeX = 1, capeY = 0, capeZ= 0;
+float capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
 GLuint* textures = new GLuint[4];
 BITMAP image[4];
 
@@ -46,15 +52,15 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	case WM_KEYDOWN: // enable all the key on keyboard to be pressed
 		if (wParam == VK_ESCAPE) PostQuitMessage(0);
 		else if (wParam == VK_LEFT) {
-			
-		
+
+
 
 			if (rotateCam <= 90) {
 				rotateCam += 1;
-				if (capeAngle < 10){
-				capeAngle += 1;
-				capeY = -0.1;
-				capeZ = -0.1;
+				if (capeAngle < 10) {
+					capeAngle += 1;
+					capeY = -0.1;
+					capeZ = -0.1;
 				}
 			}
 			else {
@@ -63,20 +69,17 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 					capeY = 0;
 					capeZ = 0;
 				}
-				
+
 			}
 			if (upperLegAngle == 30) {
 				upperlegcond = false;
-				
+
 			}
 			else if (upperLegAngle == -30)
 			{
 				upperlegcond = true;
 			}
 			if (upperlegcond) {
-
-				
-
 				upperLegAngle += 10;
 
 				lowerleftlegy += 0.01;
@@ -88,12 +91,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lowerrightlegz -= 0.06;
 				rightleglogoy -= 0.01;
 				rightleglogoz -= 0.06;
-
-
 			}
 			else
 			{
-				
 				upperLegAngle -= 10;
 
 				lowerleftlegy -= 0.01;
@@ -105,8 +105,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lowerrightlegz += 0.06;
 				rightleglogoy += 0.01;
 				rightleglogoz += 0.06;
-
-
 			}
 		}
 		else if (wParam == VK_RIGHT) {
@@ -127,9 +125,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 			}
 
-			if (upperLegAngle == 30 ) {
+			if (upperLegAngle == 30) {
 				upperlegcond = false;
-				
+
 			}
 			else if (upperLegAngle == -30)
 			{
@@ -147,7 +145,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				rightleglogoy -= 0.01;
 				rightleglogoz -= 0.06;
 
-			
+
 			}
 			else
 			{
@@ -161,23 +159,33 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lowerrightlegz += 0.06;
 				rightleglogoy += 0.01;
 				rightleglogoz += 0.06;
-					
-				
 			}
-				
+
 		}
 		else if (wParam == VK_UP) {
-			rotateBi -= 20;
-			rotateBii -= 20;
 		}
 		else if (wParam == VK_DOWN) {
-			rotateBi += 20;
-			rotateBii += 20;
 		}
 		else if (wParam == VK_SPACE) {
-			upperLegAngle = 0;
-			rotateBi = 0;
-			rotateBii = 0;
+		}
+		else if (wParam == 0x41) {
+			if (shieldrotatecamy != 90) {
+				shieldrotatecamy += 1;
+				shieldrotatecamx -= 1;
+				shieldx = -0.5;
+				shieldy = -0.04;
+				shieldz = 0;
+			}
+		}
+		else if (wParam == 0x42) {
+			if (shieldrotatecamy != 0) {
+				shieldrotatecamy -= 1;
+				shieldrotatecamx += 1;
+				shieldx = -0.5;
+				shieldy = -0.04;
+				shieldz = 0;
+			}
+
 		}
 		break;
 
@@ -365,7 +373,7 @@ void duke_lower_legs() {
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(lowerrightlegx, lowerrightlegy, lowerrightlegz);//right leg
-	glRotatef(lowerllegAngle, 1,0, 0);
+	glRotatef(lowerllegAngle, 1, 0, 0);
 	duke_lower_leg();
 	glLoadIdentity();
 	glPopMatrix();
@@ -383,7 +391,7 @@ void duke_upper_legs() {
 	glPushMatrix();
 	glTranslatef(-0.15, 0, 0);
 	glRotatef(-upperLegAngle, 1, 0, 0);
-	glRotatef(90,1,0, 0);
+	glRotatef(90, 1, 0, 0);
 	duke_upper_leg();
 	glLoadIdentity();
 	glPopMatrix();
@@ -570,11 +578,11 @@ void duke_chest() {
 }
 
 void duke_mouth() {
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 
 	glBegin(GL_QUADS);
-	glBindTexture(GL_TEXTURE_2D, textures[3]);
-	glColor3f((float)128 / 255, (float)128 / 255, (float)128 / 255);
+	//glBindTexture(GL_TEXTURE_2D, textures[3]);
+	glColor3f((float)105 / 255, (float)105 / 255, (float)105 / 255);
 	//front
 	glTexCoord2f(0.0f, 1.0f);
 	glVertex3f(-0.03, 0.8, 0.12);
@@ -629,7 +637,7 @@ void duke_mouth() {
 	glVertex3f(0.03, 0.68, 0.12);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(0.03, 0.68, 0);
-	
+
 	glColor3f((float)0 / 255, (float)0 / 255, (float)0 / 255);
 	//first
 	glVertex3f(-0.02, 0.78, 0.125);
@@ -651,7 +659,7 @@ void duke_mouth() {
 
 	glEnd();
 
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 }
 
 void duke_corn() {
@@ -839,39 +847,75 @@ void duke_shoulder() {
 	glDisable(GL_TEXTURE_2D);
 }
 
-void duke_arm() {
+void duke_lowerarm() {
+	glBegin(GL_QUADS);
+	glColor3f(1, 1, 1);
+	//front
+	glVertex3f(-0.45, 0.15, 0.05);
+	glVertex3f(-0.35, 0.15, 0.05);
+	glVertex3f(-0.35, -0.15, 0.05);
+	glVertex3f(-0.45, -0.15, 0.05);
+	//left
+	glVertex3f(-0.45, 0.15, -0.05);
+	glVertex3f(-0.45, 0.15, 0.05);
+	glVertex3f(-0.45, -0.15, 0.05);
+	glVertex3f(-0.45, -0.15, -0.05);
+	//back
+	glVertex3f(-0.45, 0.15, -0.05);
+	glVertex3f(-0.35, 0.15, -0.05);
+	glVertex3f(-0.35, -0.15, -0.05);
+	glVertex3f(-0.45, -0.15, -0.05);
+	//right
+	glVertex3f(-0.35, 0.15, -0.05);
+	glVertex3f(-0.35, 0.15, 0.05);
+	glVertex3f(-0.35, -0.15, 0.05);
+	glVertex3f(-0.35, -0.15, -0.05);
+	//top
+	glVertex3f(-0.45, 0.15, -0.05);
+	glVertex3f(-0.45, 0.15, 0.05);
+	glVertex3f(-0.35, 0.15, 0.05);
+	glVertex3f(-0.35, 0.15, -0.05);
+	//bottom
+	glVertex3f(-0.45, -0.15, -0.05);
+	glVertex3f(-0.45, -0.15, 0.05);
+	glVertex3f(-0.35, -0.15, 0.05);
+	glVertex3f(-0.35, -0.15, -0.05);
+	glEnd();
+}
+
+void duke_upperarm() {
 	glBegin(GL_QUADS);
 	glColor3f(1, 1, 1);
 	//front
 	glVertex3f(-0.45, 0.5, 0.05);
 	glVertex3f(-0.35, 0.5, 0.05);
-	glVertex3f(-0.35, -0.15, 0.05);
-	glVertex3f(-0.45, -0.15, 0.05);
+	glVertex3f(-0.35, 0.2, 0.05);
+	glVertex3f(-0.45, 0.2, 0.05);
 	//left
 	glVertex3f(-0.45, 0.5, -0.05);
 	glVertex3f(-0.45, 0.5, 0.05);
-	glVertex3f(-0.45, -0.15, 0.05);
-	glVertex3f(-0.45, -0.15, -0.05);
+	glVertex3f(-0.45, 0.2, 0.05);
+	glVertex3f(-0.45, 0.2, -0.05);
 	//back
 	glVertex3f(-0.45, 0.5, -0.05);
 	glVertex3f(-0.35, 0.5, -0.05);
-	glVertex3f(-0.35, -0.15, -0.05);
-	glVertex3f(-0.45, -0.15, -0.05);
+	glVertex3f(-0.35, 0.2, -0.05);
+	glVertex3f(-0.45, 0.2, -0.05);
 	//right
 	glVertex3f(-0.35, 0.5, -0.05);
 	glVertex3f(-0.35, 0.5, 0.05);
-	glVertex3f(-0.35, -0.15, 0.05);
-	glVertex3f(-0.35, -0.15, -0.05);
+	glVertex3f(-0.35, 0.2, 0.05);
+	glVertex3f(-0.35, 0.2, -0.05);
 	//top
 	glVertex3f(-0.45, 0.5, -0.05);
 	glVertex3f(-0.45, 0.5, 0.05);
 	glVertex3f(-0.35, 0.5, 0.05);
 	glVertex3f(-0.35, 0.5, -0.05);
 	//bottom
-	glVertex3f(-0.45, -0.15, -0.05);
-	glVertex3f(-0.45, -0.15, 0.05);
-	glVertex3f(-0.35, -0.15, 0.05);
-	glVertex3f(-0.35, -0.15, -0.05);
+	glVertex3f(-0.45, 0.2, -0.05);
+	glVertex3f(-0.45, 0.2, 0.05);
+	glVertex3f(-0.35, 0.2, 0.05);
+	glVertex3f(-0.35, 0.2, -0.05);
 	glEnd();
 }
 
@@ -919,7 +963,7 @@ void duke_weaapon() {
 	}
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
-	
+
 	*/
 
 	glEnable(GL_TEXTURE_2D);
@@ -1015,14 +1059,14 @@ void duke_shield() {
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D);
-	
+
 	glPushMatrix();
 	glColor3f(1, 0, 0);
 	glTranslatef(-0.4, 0, 0);
 	glRotatef(180, 0, 1, 1);
 	duke_shield_tape();
 	glPopMatrix();
-	
+
 	glPushMatrix();
 	glColor3f(1, 0, 0);
 	glRotatef(90, 0, 0.1, 0);
@@ -1119,7 +1163,7 @@ void duke_head() {
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(-0.65,0.4,0);
+	glTranslatef(-0.65, 0.4, 0);
 	glRotatef(-70, 0, 0, 1);
 	duke_mouth();
 	glPopMatrix();
@@ -1193,7 +1237,6 @@ void duke_head() {
 }
 
 void duke_left_hand() {
-	
 	//glRotatef(-90, 1, 0, 0);
 
 	glPushMatrix();
@@ -1203,14 +1246,28 @@ void duke_left_hand() {
 
 	glPushMatrix();
 	glTranslatef(0.8, 0, 0);
-	duke_arm();
+	duke_upperarm();
 	glPopMatrix();
-	
+
+	glPushMatrix();
+	glColor3f(1, 1, 1);
+	glTranslatef(0.4, 0.19, 0);
+	GLUquadricObj * sphere = NULL;
+	sphere = gluNewQuadric();
+	gluQuadricDrawStyle(sphere, GLU_FILL);
+	gluSphere(sphere, 0.07, 30, 30);
+	gluDeleteQuadric(sphere);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.8, 0, 0);
+	duke_lowerarm();
+	glPopMatrix();
 
 	glPushMatrix();
 	duke_weaapon();
 	glPopMatrix();
-	
+
 }
 
 void duke_right_hand() {
@@ -1220,18 +1277,31 @@ void duke_right_hand() {
 	glPopMatrix();
 
 	glPushMatrix();
-	duke_arm();
+	duke_upperarm();
 	glPopMatrix();
 
 	glPushMatrix();
-	//glRotatef(90, 0, 1, 0);
+	glColor3f(1, 1, 1);
+	glTranslatef(-0.4, 0.19, 0);
+	GLUquadricObj * sphere = NULL;
+	sphere = gluNewQuadric();
+	gluQuadricDrawStyle(sphere, GLU_FILL);
+	gluSphere(sphere, 0.07, 30, 30);
+	gluDeleteQuadric(sphere);
+	glPopMatrix();
+
+	glPushMatrix();
+	glPopMatrix();
+
+	glPushMatrix();
+	//glTranslatef(, shieldy, shieldz);
+	glRotatef(shieldrotatecamy, 0, 0, -5);
+	glRotatef(shieldrotatecamy, 0, 0.1, 0);
+	//glTranslatef(shieldx, shieldy, shieldz);
+	duke_lowerarm();
 	duke_shield();
 	glPopMatrix();
 }
-
-
-
-
 
 void duke_belt() {
 	glEnable(GL_TEXTURE_2D);
@@ -1272,11 +1342,11 @@ void duke_body() {
 
 void duke_cape() {
 	glEnable(GL_TEXTURE_2D);
-	
+
 	glBegin(GL_QUADS);
-	
+
 	glBindTexture(GL_TEXTURE_2D, textures[1]);
-	
+
 	glColor3f(1, 0, 0);
 	//front
 	glTexCoord2f(0.0f, 1.0f);
@@ -1302,7 +1372,7 @@ void duke_cape() {
 	glVertex3f(0.3, -0.6, -0.3);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-0.3, -0.6, -0.3);
-	
+
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
@@ -1317,7 +1387,7 @@ void display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear background colour (default : black)
 	glEnable(GL_DEPTH_TEST);
 	glLoadIdentity();
-	//glRotatef(180, 0, 1, 0);
+	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);//rotateCam
 
 	duke_lower_legs();
@@ -1335,7 +1405,7 @@ void display()
 
 	glPushMatrix();
 	glRotatef(capeAngle, 1, 0, 0);
-	glTranslatef(0,capeY,capeZ);
+	glTranslatef(0, capeY, capeZ);
 	duke_cape();
 	glPopMatrix();
 
@@ -1401,7 +1471,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	loadTexture(textures[1], "mRedCotton.bmp");
 	loadTexture(textures[2], "mGold.bmp");
 	loadTexture(textures[3], "mMetal.bmp");
-	
+
 	while (true)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
