@@ -1475,7 +1475,70 @@ void duke_cape() {
 	glDisable(GL_TEXTURE_2D);
 
 }
+void duke_wing() {
+	//glEnable(GL_TEXTURE_2D);
 
+	glBegin(GL_POLYGON);
+	//glTranslatef()
+	//glBindTexture(GL_TEXTURE_2D, textures[1]);
+	
+	glColor3f(1, 0, 0);
+	//front
+	glVertex3f(0, 0.6, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.8, 0.8, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(-0.2, 0.4, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.6, 0.5, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(-0.2, 0.3, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.6, 0.1, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(-0.2, 0.2, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.8, -0.2, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(-0.2, 0, -0.2);
+	glColor3f(1, 1, 1);
+	glVertex3f(0, 0.3, -0.15);
+	
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	//glTranslatef()
+	//glBindTexture(GL_TEXTURE_2D, textures[1]);
+
+	glColor3f(1, 0, 0);
+	//front
+	glVertex3f(0, 0.6, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.8, 0.8, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(0.2, 0.4, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.6, 0.5, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(0.2, 0.3, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.6, 0.1, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(0.2, 0.2, -0.3);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.8, -0.2, -0.8);
+	glColor3f(0, 0, 1);
+	glVertex3f(0.2, 0, -0.2);
+	glColor3f(1, 1, 1);
+	glVertex3f(0, 0.3, -0.15);
+
+	glEnd();
+
+	
+
+	//glDisable(GL_TEXTURE_2D);
+
+}
 void display()
 {
 	//--------------------------------
@@ -1487,7 +1550,7 @@ void display()
 
 	//rotateCam
 	glPushMatrix();
-	glRotatef(180, 0, 1, 0);
+	//glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
 	duke_lower_legs();
@@ -1506,7 +1569,12 @@ void display()
 	glPushMatrix();
 	glRotatef(capeAngle, 1, 0, 0);
 	glTranslatef(0, capeY, capeZ);
-	duke_cape();
+	//duke_cape();
+	
+	glPopMatrix();
+	glPushMatrix();
+	//glTranslatef(1, 0, 0);
+	duke_wing();
 	glPopMatrix();
 
 	glMatrixMode(GL_PROJECTION);

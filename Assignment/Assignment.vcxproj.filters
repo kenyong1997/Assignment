@@ -35,5 +35,8 @@
     <Image Include="mWhite.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="mFire.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
