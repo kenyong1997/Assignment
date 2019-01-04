@@ -1359,9 +1359,19 @@ void duke_left_hand() {
 	duke_lowerarm();
 	glPopMatrix();
 
+
 	glPushMatrix();
+	//glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+	//glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
 	duke_weaapon();
 	glPopMatrix();
+
+	//glPushMatrix();//crimson-comment for normal
+	//glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+	//glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
+	//glRotatef(180, 1, 0, 0);//crimson-comment for normal
+	//duke_weaapon();//crimson-comment for normal
+	//glPopMatrix();//crimson-comment for normal
 
 }
 
@@ -1550,7 +1560,7 @@ void display()
 
 	//rotateCam
 	glPushMatrix();
-	//glRotatef(180, 0, 1, 0);
+	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
 	duke_lower_legs();
@@ -1569,12 +1579,12 @@ void display()
 	glPushMatrix();
 	glRotatef(capeAngle, 1, 0, 0);
 	glTranslatef(0, capeY, capeZ);
-	//duke_cape();
+	duke_cape();
 	
 	glPopMatrix();
 	glPushMatrix();
 	//glTranslatef(1, 0, 0);
-	duke_wing();
+	//duke_wing();//crimson-comment for normal
 	glPopMatrix();
 
 	glMatrixMode(GL_PROJECTION);
