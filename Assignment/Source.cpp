@@ -30,13 +30,20 @@ float leftleglogox = 0, leftleglogoy = 0, leftleglogoz = 0;
 
 float shieldhandx = 0.4, shieldhandy = 0.5, shieldhandz = 0;
 float shieldx = -0.5, shieldy = -0.04, shieldz = 0;
+float lazer_height = 0;
 
 float shieldrotatecamy = 0;
-float shieldrotatecamx = 0;
+float shieldrotatecamz = 0;
 float rotateCam = 0;
+float evorotateCam = 0;
 float capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
-GLuint* textures = new GLuint[4];
-BITMAP image[4];
+
+int evo_slices = 0;
+int evo_stacks = 0;
+
+boolean evo_bool = false;
+GLuint* textures = new GLuint[6];
+BITMAP image[6];
 
 
 float lowerllegAngle = 90;
@@ -167,25 +174,75 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		else if (wParam == VK_DOWN) {
 		}
 		else if (wParam == VK_SPACE) {
+			lowerleftlegx = -0.15;
+			lowerleftlegy = -0.3;
+			lowerleftlegz = 0;
+			lowerrightlegx = 0.15;
+			lowerrightlegy = -0.3;
+			lowerrightlegz = 0;
+			rightleglogox = 0;
+			rightleglogoy = 0;
+			rightleglogoz = 0;
+			leftleglogox = 0;
+			leftleglogoy = 0;
+			leftleglogoz = 0;
+
+			shieldhandx = 0.4;
+			shieldhandy = 0.5;
+			shieldhandz = 0;
+			lazer_height = 0;
+			evo_stacks = 0;
+			evo_slices = 0;
+
+			shieldrotatecamy = 0;
+			shieldrotatecamz = 0;
+			rotateCam = 0;
+			evorotateCam = 0;
+			capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
 		}
-		else if (wParam == 0x41) {
-			if (shieldrotatecamy != 90) {
-				shieldrotatecamy += 1;
-				shieldrotatecamx -= 1;
-				shieldx = -0.5;
-				shieldy = -0.04;
-				shieldz = 0;
+		else if (wParam == 'A') { //Attack shield
+			if (shieldrotatecamy != -90) {
+				shieldrotatecamy -= 1;
+			}
+			else {
+				if (shieldrotatecamz != 50) {
+					shieldrotatecamz += 1;
+					if (rotateCam != -40) {
+						rotateCam -= 1;
+
+					}
+					else {
+						if (lazer_height != 1) {
+							lazer_height += 0.1;
+						}
+					}
+				}
 			}
 		}
-		else if (wParam == 0x42) {
+		else if (wParam == 'B') { //Defend Gesture
 			if (shieldrotatecamy != 0) {
-				shieldrotatecamy -= 1;
-				shieldrotatecamx += 1;
-				shieldx = -0.5;
-				shieldy = -0.04;
-				shieldz = 0;
+				shieldrotatecamy += 1;
+				shieldrotatecamz -= 1;
 			}
 
+		}
+		else if (wParam == 'C') { //Lazer Fire
+			if (rotateCam != -40) {
+				rotateCam -= 1;
+
+			}
+			else {
+				if (lazer_height != 1) {
+					lazer_height += 0.1;
+				}
+			}
+		}
+		else if (wParam == 'E') {
+			if (evorotateCam != 10) {
+				evorotateCam += 0.03;
+				evo_slices += 1;
+				evo_stacks += 1;
+			}
 		}
 		break;
 
@@ -286,6 +343,40 @@ void duke_foot_logo_ring() {
 
 	glDisable(GL_TEXTURE_2D);
 }
+void duke_shield_lazer() {
+	glEnable(GL_TEXTURE_2D);
+
+	GLUquadricObj * cylinder = NULL;
+	cylinder = gluNewQuadric();
+	glTranslatef(-0.49, 0, 0);
+	glRotatef(90, 0, 1, 0);
+	glRotatef(-10, 1, 0, 0);
+	glRotatef(180, 1, 0, 0);
+	gluQuadricDrawStyle(cylinder, GLU_FILL);
+	glBindTexture(GL_TEXTURE_2D, textures[4]);
+	gluQuadricTexture(cylinder, GL_TRUE);
+	gluCylinder(cylinder, 0.46, 0.46, lazer_height, 30, 30);
+	gluDeleteQuadric(cylinder);
+
+	glDisable(GL_TEXTURE_2D);
+}
+void duke_evo_sphere() {
+	//glEnable(GL_TEXTURE_2D);
+
+	glPushMatrix();
+	glColor3f(1, 0, 0);
+	GLUquadricObj * sphere = NULL;
+	sphere = gluNewQuadric();
+	gluQuadricDrawStyle(sphere, GLU_LINE);
+	//glBindTexture(GL_TEXTURE_2D, textures[0]);
+	gluQuadricTexture(sphere, GL_TRUE);
+	gluSphere(sphere, 1.0, evo_slices, evo_stacks);
+	gluDeleteQuadric(sphere);
+	glPopMatrix();
+
+	glDisable(GL_TEXTURE_2D);
+
+}
 void duke_foots_logo() {
 	glPushMatrix();
 	glTranslatef(rightleglogox, rightleglogoy, rightleglogoz);
@@ -315,7 +406,6 @@ void duke_logo_ring() {
 	glLoadIdentity();
 	glPopMatrix();
 }
-
 
 void duke_shield_tape() {
 	glEnable(GL_TEXTURE_2D);
@@ -1068,6 +1158,11 @@ void duke_shield() {
 	glPopMatrix();
 
 	glPushMatrix();
+	glColor3f(1, 1, 1);
+	duke_shield_lazer();
+	glPopMatrix();
+
+	glPushMatrix();
 	glColor3f(1, 0, 0);
 	glRotatef(90, 0, 0.1, 0);
 	//glRotatef(-90, 0, 0, 0.1);
@@ -1294,10 +1389,12 @@ void duke_right_hand() {
 	glPopMatrix();
 
 	glPushMatrix();
-	//glTranslatef(, shieldy, shieldz);
-	glRotatef(shieldrotatecamy, 0, 0, -5);
-	glRotatef(shieldrotatecamy, 0, 0.1, 0);
-	//glTranslatef(shieldx, shieldy, shieldz);
+	glTranslatef(0.4, 0.2, 0);
+	glRotatef(shieldrotatecamy, 1, 0, 0);
+	glTranslatef(-0.4, -0.2, 0);
+	glTranslatef(-0.4, 0.2, 1);
+	glRotatef(shieldrotatecamz, 0, 0, 1);
+	glTranslatef(0.4, -0.2, -1);
 	duke_lowerarm();
 	duke_shield();
 	glPopMatrix();
@@ -1386,9 +1483,12 @@ void display()
 	//--------------------------------
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear background colour (default : black)
 	glEnable(GL_DEPTH_TEST);
-	glLoadIdentity();
+	glRotatef(evorotateCam, 0, 1, 0);
+
+	//rotateCam
+	glPushMatrix();
 	glRotatef(180, 0, 1, 0);
-	glRotatef(rotateCam, 0, 1, 0);//rotateCam
+	glRotatef(rotateCam, 0, 1, 0);
 
 	duke_lower_legs();
 	glPushMatrix();
@@ -1402,7 +1502,7 @@ void display()
 	duke_corn();
 	duke_left_hand();
 	duke_right_hand();
-
+	duke_evo_sphere();
 	glPushMatrix();
 	glRotatef(capeAngle, 1, 0, 0);
 	glTranslatef(0, capeY, capeZ);
@@ -1419,6 +1519,7 @@ void display()
 	//--------------------------------
 	//	End of OpenGL drawing
 	//--------------------------------
+	glPopMatrix();
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
@@ -1466,11 +1567,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 24);
 
 	//Step4: Assign texture to polygon
-	glGenTextures(4, textures);
+	glGenTextures(6, textures);
 	loadTexture(textures[0], "mRed.bmp");
 	loadTexture(textures[1], "mRedCotton.bmp");
 	loadTexture(textures[2], "mGold.bmp");
 	loadTexture(textures[3], "mMetal.bmp");
+	loadTexture(textures[4], "mFire.bmp");
 
 
 	while (true)
