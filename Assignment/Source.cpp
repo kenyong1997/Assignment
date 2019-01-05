@@ -32,8 +32,11 @@ float shieldhandx = 0.4, shieldhandy = 0.5, shieldhandz = 0;
 float shieldx = -0.5, shieldy = -0.04, shieldz = 0;
 float lazer_height = 0;
 
+float weaponrotatecamy = 0;
+float weaponrotatecamz = 0;
 float shieldrotatecamy = 0;
 float shieldrotatecamz = 0;
+float shieldrotatecamx = 0;
 float rotateCam = 0;
 float evorotateCam = 0;
 float capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
@@ -43,7 +46,7 @@ int evo_stacks = 0;
 
 float walk_translatex = 0;
 
-boolean evo_success = false;
+boolean evo_success = false, doneRotate = false;
 boolean evolved = false;
 GLuint* textures = new GLuint[6];
 BITMAP image[6];
@@ -204,11 +207,14 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 			shieldrotatecamy = 0;
 			shieldrotatecamz = 0;
+			weaponrotatecamy = 0;
+			weaponrotatecamz = 0;
 			rotateCam = 0;
 			evorotateCam = 0;
 			capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
 		}
 		else if (wParam == 'A') { //Attack shield
+		if(!evolved){
 			if (shieldrotatecamy != -90) {
 				shieldrotatecamy -= 1;
 			}
@@ -226,6 +232,28 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				}
 			}
 		}
+		else {
+			if (shieldrotatecamy != -10) {
+				shieldrotatecamy -= 1;
+			}
+			if (shieldrotatecamz != -5) {
+				shieldrotatecamz -= 1;
+			}
+			if (shieldrotatecamx != 5) {
+				shieldrotatecamx += 1;
+			}
+			if (rotateCam != -40) {
+				rotateCam -= 1;
+			}
+			else {
+				if (lazer_height < 1) {
+					lazer_height += 0.1;
+				}
+			}
+
+		
+		}
+		}
 		else if (wParam == 'B') { //Defend Gesture
 			if (shieldrotatecamy != 0) {
 				shieldrotatecamy += 1;
@@ -234,15 +262,11 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 		}
 		else if (wParam == 'C') { //Lazer Fire
-			if (rotateCam != -40) {
-				rotateCam -= 1;
-
-			}
-			else {
+			
 				if (lazer_height < 1) {
 					lazer_height += 0.1;
 				}
-			}
+			
 		}
 		else if (wParam == 'E') {
 			if (evorotateCam < 4 && evo_success == false) {
@@ -256,6 +280,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				evo_stacks = 0;
 				evo_slices = 0;
 				evorotateCam = 0;
+				weaponrotatecamy = 0;
 			}
 		}
 		else if (wParam == 'D') {
@@ -269,10 +294,41 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lazer_height = 0;
 				evo_stacks = 0;
 				evo_slices = 0;
+				weaponrotatecamy = 0;
 				evorotateCam = 0;
 			}
 		}
-
+		else if (wParam == 'O') { //Attack weapon
+			
+			if (!evolved) {
+				if (weaponrotatecamy != -70) {
+					weaponrotatecamy -= 1;
+				}
+			}
+			else
+			{
+				if (rotateCam >= -90) {
+					rotateCam -= 1;
+				}
+				if (walk_translatex > -0.5) {
+					walk_translatex -= 0.01;
+				}
+				if (weaponrotatecamy != -50) {
+					weaponrotatecamy -= 1;
+				}
+				if (rotateCam ==-90) {
+					doneRotate = true;
+				}
+				if(doneRotate){
+				if (walk_translatex < 0.5) {
+					walk_translatex += 0.1;
+					/*if (lazer_height < 1) {
+						lazer_height += 0.1;
+					}*/
+				}
+				}
+			}
+		}
 	default:
 		break;
 	}
@@ -410,6 +466,18 @@ void duke_evo_sphere() {
 	//glDisable(GL_TEXTURE_2D);
 
 }
+
+void duke_hand() {
+	glColor3f(1, 1, 1);
+	glTranslatef(-0.4, -0.2, 0);
+	GLUquadricObj * sphere = NULL;
+	sphere = gluNewQuadric();
+	gluQuadricDrawStyle(sphere, GLU_FILL);
+	gluSphere(sphere, 0.07, 30, 30);
+	gluDeleteQuadric(sphere);
+	glTranslatef(0.4, 0.2, 0);
+}
+
 void duke_foots_logo() {
 	glPushMatrix();
 	glTranslatef(rightleglogox, rightleglogoy, rightleglogoz);
@@ -699,41 +767,78 @@ void duke_chest() {
 	glVertex3f(0.3, 0.45, 0.15);
 	glVertex3f(0.3, 0.45, -0.15);
 	glEnd();
-}
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	
+	glTranslatef(0, 0.5, 0.16);
+	glScalef(0.5, 0.5, 0.5);
+	glBegin(GL_TRIANGLES);
+	//front
+	glTexCoord2f(-1.0f, 1.0f);
+	glVertex2f(-0.1, -0.1);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(0.1, -0.1);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(0, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(-0.11, -0.1);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(-0.21, -0.23);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(-0.01, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(0.11, -0.1);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(0.21, -0.23);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(0.01, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(0, 0.04);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(-0.1, -0.09);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(0.1, -0.09);
+
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+}
 void duke_evo_chest() {
 	glBegin(GL_QUADS);
 	//front
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.15, 0.25, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.15, 0.25, 0.15);
 	//left
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, -0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.15, 0.25, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.15, 0.25, -0.15);
 	//back
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, -0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.15, 0.25, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.15, 0.25, -0.15);
 	//right
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, -0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.15, 0.25, 0.15);
@@ -745,13 +850,13 @@ void duke_evo_chest() {
 	glVertex3f(0.3, 0.45, 0.15);
 	glVertex3f(0.3, 0.45, -0.15);
 	//bottom
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.15, 0.25, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.15, 0.25, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.15, 0.25, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.15, 0.25, -0.15);
 	glEnd();
 
@@ -761,45 +866,45 @@ void duke_evo_chest() {
 	glVertex3f(-0.3, 0.6, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.3, 0.6, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, 0.15);
 	//left
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.3, 0.6, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.3, 0.6, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, -0.15);
 	//back
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.3, 0.6, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.3, 0.6, -0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, -0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.45, -0.15);
 	//right
 	glColor3f(1, 0, 0);
 	glVertex3f(0.3, 0.6, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.3, 0.6, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.45, -0.15);
 	//top
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(-0.3, 0.6, -0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(-0.3, 0.6, 0.15);
 	glColor3f(1, 0, 0);
 	glVertex3f(0.3, 0.6, 0.15);
-	glColor3f(1, 1, 1);
+	glColor3f(0, 0, 0);
 	glVertex3f(0.3, 0.6, -0.15);
 	//bottom
 	glVertex3f(-0.3, 0.45, -0.15);
@@ -807,7 +912,152 @@ void duke_evo_chest() {
 	glVertex3f(0.3, 0.45, 0.15);
 	glVertex3f(0.3, 0.45, -0.15);
 	glEnd();
+
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+	glTranslatef(0, 0.5, 0.16);
+	glScalef(0.5, 0.5, 0.5);
+	glBegin(GL_TRIANGLES);
+	//front
+	glTexCoord2f(-1.0f, 1.0f);
+	glVertex2f(-0.1, -0.1);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(0.1, -0.1);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(0, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(-0.11, -0.1);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(-0.21, -0.23);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(-0.01, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(0.11, -0.1);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(0.21, -0.23);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(0.01, -0.23);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(0, 0.04);
+	glTexCoord2f(-1.0f, 0.0f);
+	glVertex2f(-0.1, -0.09);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex2f(0.1, -0.09);
+
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }
+//void duke_evo_chest() {
+//	glBegin(GL_QUADS);
+//	//front
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.15, 0.25, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.15, 0.25, 0.15);
+//	//left
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.15, 0.25, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.15, 0.25, -0.15);
+//	//back
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.15, 0.25, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.15, 0.25, -0.15);
+//	//right
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.15, 0.25, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.15, 0.25, -0.15);
+//	//top
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	//bottom
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.15, 0.25, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.15, 0.25, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.15, 0.25, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.15, 0.25, -0.15);
+//	glEnd();
+//
+//	glBegin(GL_QUADS);
+//	//front
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.3, 0.6, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.3, 0.6, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	//left
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.3, 0.6, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.3, 0.6, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	//back
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.3, 0.6, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.3, 0.6, -0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	//right
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.3, 0.6, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.3, 0.6, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	//top
+//	glColor3f(1, 1, 1);
+//	glVertex3f(-0.3, 0.6, -0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(-0.3, 0.6, 0.15);
+//	glColor3f(1, 0, 0);
+//	glVertex3f(0.3, 0.6, 0.15);
+//	glColor3f(1, 1, 1);
+//	glVertex3f(0.3, 0.6, -0.15);
+//	//bottom
+//	glVertex3f(-0.3, 0.45, -0.15);
+//	glVertex3f(-0.3, 0.45, 0.15);
+//	glVertex3f(0.3, 0.45, 0.15);
+//	glVertex3f(0.3, 0.45, -0.15);
+//	glEnd();
+//}
 
 void duke_mouth() {
 	//glEnable(GL_TEXTURE_2D);
@@ -1497,38 +1747,49 @@ void duke_left_hand() {
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslatef(-0.4, 0.2, 0);
+	glRotatef(weaponrotatecamy, 1, 0, 0);
+	glTranslatef(0.4, -0.2, 0);
+	glTranslatef(0.4, 0.2, 1);
+	glRotatef(weaponrotatecamz, 0, 0, 1);
+	glTranslatef(-0.4, -0.2, -1);
+
+	glPushMatrix();
 	glTranslatef(0.8, 0, 0);
 	if (evo_success) {// adjust hand in here, i dk how to translate
+		glTranslatef(-0.4, 0.2, 0);
 		glRotatef(-45, 1, 1, 0);
+		glTranslatef(0.4, -0.2, 0);
 	}
 	duke_lowerarm();
+	duke_hand();
 	glPopMatrix();
-	
-
 
 	if (!evo_success) {
 		glPushMatrix();
+		glTranslatef(0, -0.1, 0);
+		
 		duke_weaapon();
 		glPopMatrix();
 	}
-	else{
+	else {
 
 		glPushMatrix();
 		glRotatef(-45, 1, 1, 0);
 		glPushMatrix();
 		glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-		glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
+		glTranslatef(0, -0.25, -0.2);//crimson-comment for normal
 		duke_weaapon();
 		glPopMatrix();
 		glPushMatrix();//crimson-comment for normal
 		glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-		glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
+		glTranslatef(0, 0.45, -0.2);//crimson-comment for normal
 		glRotatef(180, 1, 0, 0);//crimson-comment for normal
 		duke_weaapon();//crimson-comment for normal
 		glPopMatrix();//crimson-comment for normal
 		glPopMatrix();
 	}
-
+	glPopMatrix();
 }
 
 void duke_right_hand() {
@@ -1560,6 +1821,7 @@ void duke_right_hand() {
 	glTranslatef(-0.4, -0.2, 0);
 	glTranslatef(-0.4, 0.2, 1);
 	glRotatef(shieldrotatecamz, 0, 0, 1);
+	glRotatef(shieldrotatecamx, 0, 1, 0);
 	glTranslatef(0.4, -0.2, -1);
 	if (evo_success == true) {
 		glTranslatef(-0.4, 0.2, 0);
@@ -1568,6 +1830,7 @@ void duke_right_hand() {
 	}
 	duke_lowerarm();
 	duke_shield();
+	duke_hand();
 	glPopMatrix();
 }
 
@@ -1722,12 +1985,12 @@ void display()
 	//--------------------------------
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear background colour (default : black)
 	glEnable(GL_DEPTH_TEST);
-	
+
 	if (evolved) {
 		glRotatef(evorotateCam, 0, 1, 0);
 	}
 
-	if (evo_success&&!evolved) {
+	if (evo_success && !evolved) {
 		glLoadIdentity();
 		evolved = true;
 		//glRotatef(0, 0, 1, 0);
@@ -1741,7 +2004,7 @@ void display()
 	//rotateCam
 	glPushMatrix();
 	glTranslatef(walk_translatex, 0, 0);
-	
+
 	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
