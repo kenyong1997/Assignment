@@ -44,6 +44,7 @@ int evo_stacks = 0;
 float walk_translatex = 0;
 
 boolean evo_success = false;
+boolean evolved = false;
 GLuint* textures = new GLuint[6];
 BITMAP image[6];
 
@@ -244,7 +245,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			}
 		}
 		else if (wParam == 'E') {
-			if (evorotateCam < 3 && evo_success == false) {
+			if (evorotateCam < 4 && evo_success == false) {
 				evorotateCam += 0.03;
 				evo_slices += 1;
 				evo_stacks += 1;
@@ -254,12 +255,11 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lazer_height = 0;
 				evo_stacks = 0;
 				evo_slices = 0;
-				rotateCam = 0;
 				evorotateCam = 0;
 			}
 		}
 		else if (wParam == 'D') {
-			if (evorotateCam < 3 && evo_success == true) {
+			if (evorotateCam < 4 && evo_success == true) {
 				evorotateCam += 0.03;
 				evo_slices += 1;
 				evo_stacks += 1;
@@ -269,7 +269,6 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lazer_height = 0;
 				evo_stacks = 0;
 				evo_slices = 0;
-				rotateCam = 0;
 				evorotateCam = 0;
 			}
 		}
@@ -1499,8 +1498,13 @@ void duke_left_hand() {
 
 	glPushMatrix();
 	glTranslatef(0.8, 0, 0);
+	if (evo_success) {
+		glRotatef(-45, 1, 1, 0);
+	}
 	duke_lowerarm();
 	glPopMatrix();
+	
+
 
 	if (!evo_success) {
 		glPushMatrix();
@@ -1509,18 +1513,20 @@ void duke_left_hand() {
 	}
 	else{
 
-	glPushMatrix();
-	glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-	glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
-	duke_weaapon();
-	glPopMatrix();
-
-	glPushMatrix();//crimson-comment for normal
-	glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-	glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
-	glRotatef(180, 1, 0, 0);//crimson-comment for normal
-	duke_weaapon();//crimson-comment for normal
-	glPopMatrix();//crimson-comment for normal
+		glPushMatrix();
+		glRotatef(-45, 1, 1, 0);
+		glPushMatrix();
+		glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+		glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
+		duke_weaapon();
+		glPopMatrix();
+		glPushMatrix();//crimson-comment for normal
+		glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+		glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
+		glRotatef(180, 1, 0, 0);//crimson-comment for normal
+		duke_weaapon();//crimson-comment for normal
+		glPopMatrix();//crimson-comment for normal
+		glPopMatrix();
 	}
 
 }
@@ -1716,11 +1722,26 @@ void display()
 	//--------------------------------
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear background colour (default : black)
 	glEnable(GL_DEPTH_TEST);
-	glRotatef(evorotateCam, 0, 1, 0);
+	
+	if (evolved) {
+		glRotatef(evorotateCam, 0, 1, 0);
+	}
 
+	if (evo_success&&!evolved) {
+		glLoadIdentity();
+		evolved = true;
+		//glRotatef(0, 0, 1, 0);
+	}
+	if (!evo_success && evolved) {
+		glLoadIdentity();
+		evolved = false;
+		//glRotatef(0, 0, 1, 0);
+	}
+	glRotatef(evorotateCam, 0, 1, 0);
 	//rotateCam
 	glPushMatrix();
 	glTranslatef(walk_translatex, 0, 0);
+	
 	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
