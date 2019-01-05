@@ -1498,7 +1498,7 @@ void duke_left_hand() {
 
 	glPushMatrix();
 	glTranslatef(0.8, 0, 0);
-	if (evo_success) {
+	if (evo_success) {// adjust hand in here, i dk how to translate
 		glRotatef(-45, 1, 1, 0);
 	}
 	duke_lowerarm();
