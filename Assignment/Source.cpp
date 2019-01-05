@@ -41,7 +41,9 @@ float capeAngle = 0, capeX = 1, capeY = 0, capeZ = 0;
 int evo_slices = 0;
 int evo_stacks = 0;
 
-boolean evo_bool = false;
+float walk_translatex = 0;
+
+boolean evo_success = false;
 GLuint* textures = new GLuint[6];
 BITMAP image[6];
 
@@ -59,11 +61,8 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	case WM_KEYDOWN: // enable all the key on keyboard to be pressed
 		if (wParam == VK_ESCAPE) PostQuitMessage(0);
 		else if (wParam == VK_LEFT) {
-
-
-
 			if (rotateCam <= 90) {
-				rotateCam += 1;
+				rotateCam += 2;
 				if (capeAngle < 10) {
 					capeAngle += 1;
 					capeY = -0.1;
@@ -71,6 +70,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				}
 			}
 			else {
+				if (walk_translatex > -0.5) {
+					walk_translatex -= 0.01;
+				}
 				while (capeAngle != 0) {
 					capeAngle = 0;
 					capeY = 0;
@@ -116,7 +118,7 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		}
 		else if (wParam == VK_RIGHT) {
 			if (rotateCam >= -90) {
-				rotateCam -= 1;
+				rotateCam -= 2;
 				if (capeAngle < 10) {
 					capeAngle += 1;
 					capeY = -0.1;
@@ -124,6 +126,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				}
 			}
 			else {
+				if (walk_translatex < 0.5) {
+					walk_translatex += 0.01;
+				}
 				while (capeAngle != 0) {
 					capeAngle -= 0.5;
 					capeY = 0;
@@ -194,6 +199,8 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			evo_stacks = 0;
 			evo_slices = 0;
 
+			walk_translatex = 0;
+
 			shieldrotatecamy = 0;
 			shieldrotatecamz = 0;
 			rotateCam = 0;
@@ -209,10 +216,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 					shieldrotatecamz += 1;
 					if (rotateCam != -40) {
 						rotateCam -= 1;
-
 					}
 					else {
-						if (lazer_height != 1) {
+						if (lazer_height < 1) {
 							lazer_height += 0.1;
 						}
 					}
@@ -232,19 +238,41 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 			}
 			else {
-				if (lazer_height != 1) {
+				if (lazer_height < 1) {
 					lazer_height += 0.1;
 				}
 			}
 		}
 		else if (wParam == 'E') {
-			if (evorotateCam != 10) {
+			if (evorotateCam < 3 && evo_success == false) {
 				evorotateCam += 0.03;
 				evo_slices += 1;
 				evo_stacks += 1;
 			}
+			else {
+				evo_success = true;
+				lazer_height = 0;
+				evo_stacks = 0;
+				evo_slices = 0;
+				rotateCam = 0;
+				evorotateCam = 0;
+			}
 		}
-		break;
+		else if (wParam == 'D') {
+			if (evorotateCam < 3 && evo_success == true) {
+				evorotateCam += 0.03;
+				evo_slices += 1;
+				evo_stacks += 1;
+			}
+			else {
+				evo_success = false;
+				lazer_height = 0;
+				evo_stacks = 0;
+				evo_slices = 0;
+				rotateCam = 0;
+				evorotateCam = 0;
+			}
+		}
 
 	default:
 		break;
@@ -353,7 +381,12 @@ void duke_shield_lazer() {
 	glRotatef(-10, 1, 0, 0);
 	glRotatef(180, 1, 0, 0);
 	gluQuadricDrawStyle(cylinder, GLU_FILL);
-	glBindTexture(GL_TEXTURE_2D, textures[4]);
+	if (evo_success == true) {
+		glBindTexture(GL_TEXTURE_2D, textures[5]);
+	}
+	else {
+		glBindTexture(GL_TEXTURE_2D, textures[4]);
+	}
 	gluQuadricTexture(cylinder, GL_TRUE);
 	gluCylinder(cylinder, 0.46, 0.46, lazer_height, 30, 30);
 	gluDeleteQuadric(cylinder);
@@ -365,16 +398,17 @@ void duke_evo_sphere() {
 
 	glPushMatrix();
 	glColor3f(1, 0, 0);
+	glTranslatef(walk_translatex, 0, 0);
 	GLUquadricObj * sphere = NULL;
 	sphere = gluNewQuadric();
 	gluQuadricDrawStyle(sphere, GLU_LINE);
 	//glBindTexture(GL_TEXTURE_2D, textures[0]);
-	gluQuadricTexture(sphere, GL_TRUE);
+	//gluQuadricTexture(sphere, GL_TRUE);
 	gluSphere(sphere, 1.0, evo_slices, evo_stacks);
 	gluDeleteQuadric(sphere);
 	glPopMatrix();
 
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
 
 }
 void duke_foots_logo() {
@@ -491,6 +525,7 @@ void duke_foot() {
 	glEnable(GL_TEXTURE_2D);
 
 	glBegin(GL_QUADS);
+
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	glColor3f((float)255 / 255, (float)0 / 255, (float)0 / 255);
 	//front
@@ -667,6 +702,114 @@ void duke_chest() {
 	glEnd();
 }
 
+void duke_evo_chest() {
+	glBegin(GL_QUADS);
+	//front
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.15, 0.25, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.15, 0.25, 0.15);
+	//left
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.15, 0.25, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.15, 0.25, -0.15);
+	//back
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.15, 0.25, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.15, 0.25, -0.15);
+	//right
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.15, 0.25, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.15, 0.25, -0.15);
+	//top
+	glVertex3f(-0.3, 0.45, -0.15);
+	glVertex3f(-0.3, 0.45, 0.15);
+	glVertex3f(0.3, 0.45, 0.15);
+	glVertex3f(0.3, 0.45, -0.15);
+	//bottom
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.15, 0.25, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.15, 0.25, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.15, 0.25, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.15, 0.25, -0.15);
+	glEnd();
+
+	glBegin(GL_QUADS);
+	//front
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.3, 0.6, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.3, 0.6, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, 0.15);
+	//left
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.3, 0.6, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.3, 0.6, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, -0.15);
+	//back
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.3, 0.6, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.3, 0.6, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, -0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.45, -0.15);
+	//right
+	glColor3f(1, 0, 0);
+	glVertex3f(0.3, 0.6, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.3, 0.6, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.45, -0.15);
+	//top
+	glColor3f(1, 1, 1);
+	glVertex3f(-0.3, 0.6, -0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(-0.3, 0.6, 0.15);
+	glColor3f(1, 0, 0);
+	glVertex3f(0.3, 0.6, 0.15);
+	glColor3f(1, 1, 1);
+	glVertex3f(0.3, 0.6, -0.15);
+	//bottom
+	glVertex3f(-0.3, 0.45, -0.15);
+	glVertex3f(-0.3, 0.45, 0.15);
+	glVertex3f(0.3, 0.45, 0.15);
+	glVertex3f(0.3, 0.45, -0.15);
+	glEnd();
+}
+
 void duke_mouth() {
 	//glEnable(GL_TEXTURE_2D);
 
@@ -791,9 +934,9 @@ void duke_corn() {
 void duke_down_mask() {
 	glEnable(GL_TEXTURE_2D);
 
+
 	glBegin(GL_QUADS);
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
-
 	glColor3f(1, 0, 0);
 	//front
 	glTexCoord2f(0.0f, 1.0f);
@@ -857,9 +1000,9 @@ void duke_down_mask() {
 void duke_up_mask() {
 	glEnable(GL_TEXTURE_2D);
 
-	glBegin(GL_QUADS);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
 
+	glBegin(GL_QUADS);
+	glBindTexture(GL_TEXTURE_2D, textures[4]);
 	glColor3f(1, 0, 0);
 	//front
 	glTexCoord2f(0.0f, 1.0f);
@@ -1169,9 +1312,9 @@ void duke_shield() {
 
 	glTranslatef(0, 0.1, -0.7);
 	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
 
 	glBegin(GL_TRIANGLES);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	//front
 	glTexCoord2f(-1.0f, 1.0f);
 	glVertex2f(-0.1, -0.1);
@@ -1202,9 +1345,9 @@ void duke_shield() {
 	glVertex2f(0.1, -0.09);
 
 	glEnd();
+	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 
-	glDisable(GL_TEXTURE_2D);
 }
 
 void duke_eyes() {
@@ -1359,19 +1502,26 @@ void duke_left_hand() {
 	duke_lowerarm();
 	glPopMatrix();
 
+	if (!evo_success) {
+		glPushMatrix();
+		duke_weaapon();
+		glPopMatrix();
+	}
+	else{
 
 	glPushMatrix();
-	//glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-	//glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
+	glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+	glTranslatef(0, -0.35, -0.2);//crimson-comment for normal
 	duke_weaapon();
 	glPopMatrix();
 
-	//glPushMatrix();//crimson-comment for normal
-	//glRotatef(-90, 1, 0, 0);//crimson- comment for normal
-	//glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
-	//glRotatef(180, 1, 0, 0);//crimson-comment for normal
-	//duke_weaapon();//crimson-comment for normal
-	//glPopMatrix();//crimson-comment for normal
+	glPushMatrix();//crimson-comment for normal
+	glRotatef(-90, 1, 0, 0);//crimson- comment for normal
+	glTranslatef(0, 0.35, -0.2);//crimson-comment for normal
+	glRotatef(180, 1, 0, 0);//crimson-comment for normal
+	duke_weaapon();//crimson-comment for normal
+	glPopMatrix();//crimson-comment for normal
+	}
 
 }
 
@@ -1405,6 +1555,11 @@ void duke_right_hand() {
 	glTranslatef(-0.4, 0.2, 1);
 	glRotatef(shieldrotatecamz, 0, 0, 1);
 	glTranslatef(0.4, -0.2, -1);
+	if (evo_success == true) {
+		glTranslatef(-0.4, 0.2, 0);
+		glRotatef(30, 0, 1, 0);
+		glTranslatef(0.4, -0.2, 0);
+	}
 	duke_lowerarm();
 	duke_shield();
 	glPopMatrix();
@@ -1443,7 +1598,12 @@ void duke_body() {
 	glLoadIdentity();
 	glPopMatrix();
 	glPushMatrix();
-	duke_chest();
+	if (evo_success == true) {
+		duke_evo_chest();
+	}
+	else {
+		duke_chest();
+	}
 	glPopMatrix();
 }
 
@@ -1491,7 +1651,7 @@ void duke_wing() {
 	glBegin(GL_POLYGON);
 	//glTranslatef()
 	//glBindTexture(GL_TEXTURE_2D, textures[1]);
-	
+
 	glColor3f(1, 0, 0);
 	//front
 	glVertex3f(0, 0.6, -0.15);
@@ -1513,7 +1673,7 @@ void duke_wing() {
 	glVertex3f(-0.2, 0, -0.2);
 	glColor3f(1, 1, 1);
 	glVertex3f(0, 0.3, -0.15);
-	
+
 	glEnd();
 
 	glBegin(GL_POLYGON);
@@ -1544,7 +1704,7 @@ void duke_wing() {
 
 	glEnd();
 
-	
+
 
 	//glDisable(GL_TEXTURE_2D);
 
@@ -1560,6 +1720,7 @@ void display()
 
 	//rotateCam
 	glPushMatrix();
+	glTranslatef(walk_translatex, 0, 0);
 	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
@@ -1579,12 +1740,17 @@ void display()
 	glPushMatrix();
 	glRotatef(capeAngle, 1, 0, 0);
 	glTranslatef(0, capeY, capeZ);
-	duke_cape();
-	
+
 	glPopMatrix();
 	glPushMatrix();
 	//glTranslatef(1, 0, 0);
-	//duke_wing();//crimson-comment for normal
+	if (evo_success == true) {
+		duke_wing();
+	}
+	else {
+		duke_cape();
+	}
+
 	glPopMatrix();
 
 	glMatrixMode(GL_PROJECTION);
@@ -1619,7 +1785,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 
 	//--------------------------------
 	//	Initialize window for OpenGL
-	//--------------------------------
+	//-------------------------------- 
 
 	HDC hdc = GetDC(hWnd);
 
@@ -1651,6 +1817,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	loadTexture(textures[2], "mGold.bmp");
 	loadTexture(textures[3], "mMetal.bmp");
 	loadTexture(textures[4], "mFire.bmp");
+	loadTexture(textures[5], "mEvoFire.bmp");
 
 
 	while (true)
@@ -1672,7 +1839,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 	}
 
 	DeleteObject(hBMP);
-	glDeleteTextures(4, textures);
+	glDeleteTextures(6, textures);
 
 
 	UnregisterClass(WINDOW_TITLE, wc.hInstance);
