@@ -53,6 +53,7 @@ float walk_translatex = 0, walk_translatez = 0;
 boolean invi = false;
 boolean evo_success = false, doneRotate = false;
 boolean evolved = false;
+boolean checkzoom = false;
 GLuint* textures = new GLuint[8];
 BITMAP image[8];
 
@@ -241,61 +242,61 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			}
 		}
 		else if (wParam == VK_DOWN) {
-		if (rotateCam < 0) {
-			rotateCam += 2;
-			if (capeAngle < 10) {
-				capeAngle += 1;
-				capeY = -0.1;
-				capeZ = -0.1;
+			if (rotateCam < 0) {
+				rotateCam += 2;
+				if (capeAngle < 10) {
+					capeAngle += 1;
+					capeY = -0.1;
+					capeZ = -0.1;
+				}
 			}
-		}
-		else {
-			if (walk_translatez < 1.0) {
-				walk_translatez += 0.01;
+			else {
+				if (walk_translatez < 1.0) {
+					walk_translatez += 0.01;
+				}
+				while (capeAngle != 0) {
+					capeAngle -= 0.5;
+					capeY = 0;
+					capeZ = 0;
+				}
+
 			}
-			while (capeAngle != 0) {
-				capeAngle -= 0.5;
-				capeY = 0;
-				capeZ = 0;
+
+			if (upperLegAngle == 30) {
+				upperlegcond = false;
+
 			}
+			else if (upperLegAngle == -30)
+			{
+				upperlegcond = true;
+			}
+			if (upperlegcond) {
+				upperLegAngle += 10;
+				lowerleftlegy += 0.01;
+				lowerleftlegz += 0.06;
+				leftleglogoy += 0.01;
+				leftleglogoz += 0.06;
 
-		}
-
-		if (upperLegAngle == 30) {
-			upperlegcond = false;
-
-		}
-		else if (upperLegAngle == -30)
-		{
-			upperlegcond = true;
-		}
-		if (upperlegcond) {
-			upperLegAngle += 10;
-			lowerleftlegy += 0.01;
-			lowerleftlegz += 0.06;
-			leftleglogoy += 0.01;
-			leftleglogoz += 0.06;
-
-			lowerrightlegy -= 0.01;
-			lowerrightlegz -= 0.06;
-			rightleglogoy -= 0.01;
-			rightleglogoz -= 0.06;
+				lowerrightlegy -= 0.01;
+				lowerrightlegz -= 0.06;
+				rightleglogoy -= 0.01;
+				rightleglogoz -= 0.06;
 
 
-		}
-		else
-		{
-			upperLegAngle -= 10;
-			lowerleftlegy -= 0.01;
-			lowerleftlegz -= 0.06;
-			leftleglogoy -= 0.01;
-			leftleglogoz -= 0.06;
+			}
+			else
+			{
+				upperLegAngle -= 10;
+				lowerleftlegy -= 0.01;
+				lowerleftlegz -= 0.06;
+				leftleglogoy -= 0.01;
+				leftleglogoz -= 0.06;
 
-			lowerrightlegy += 0.01;
-			lowerrightlegz += 0.06;
-			rightleglogoy += 0.01;
-			rightleglogoz += 0.06;
-		}
+				lowerrightlegy += 0.01;
+				lowerrightlegz += 0.06;
+				rightleglogoy += 0.01;
+				rightleglogoz += 0.06;
+			}
 		}
 		else if (wParam == VK_SPACE) {
 			lowerleftlegx = -0.15;
@@ -541,25 +542,25 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			pos2[2] = 0;
 		}
 		else if (wParam == 'W') {// Zoom in / out
-		if (zoom > 1)
-			zoom -= 1;
+			if (zoom > 0)
+				zoom -= 1;
 		}
 		else if (wParam == 'S') {// Zoom out
-		zoom += 1;
+			zoom += 1;
 		}
 		else if (wParam == 'A') {// Camera turn left
-		rotateCam += 3;
+			rotateCam += 3;
 		}
 		else if (wParam == 'D') {// Camera turn right 
-		rotateCam -= 3;
+			rotateCam -= 3;
 		}
 		else if (wParam == 'L') {// Turn on / off the light
-		if (!glIsEnabled(GL_LIGHTING)) {
-			glEnable(GL_LIGHTING);
-		}
-		else {
-			glDisable(GL_LIGHTING);
-		}
+			if (!glIsEnabled(GL_LIGHTING)) {
+				glEnable(GL_LIGHTING);
+			}
+			else {
+				glDisable(GL_LIGHTING);
+			}
 		}
 	default:
 		break;
@@ -2329,8 +2330,10 @@ void duke_wing() {
 	//glDisable(GL_TEXTURE_2D);
 
 }
+
 void display()
 {
+
 	//--------------------------------
 	//	OpenGL drawing
 	//--------------------------------
@@ -2357,17 +2360,21 @@ void display()
 		//glRotatef(0, 0, 1, 0);
 	}
 	glRotatef(evorotateCam, 0, 1, 0);
-	//rotateCam
-	glPushMatrix();
-	glTranslatef(walk_translatex, 0, walk_translatez);
 
+	//rotateCam
+	glPushMatrix();//4
+	glTranslatef(walk_translatex, 0, walk_translatez);
+	glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	//glRotatef(evorotateCam, 0, 1, 0);
+	glOrtho(-zoom, zoom, -zoom, zoom, -zoom, zoom);
 	glRotatef(180, 0, 1, 0);
 	glRotatef(rotateCam, 0, 1, 0);
 
 	duke_lower_legs();
-	glPushMatrix();
+	glPushMatrix();//1
 	duke_upper_legs();
-	glPopMatrix();
+	glPopMatrix();//1
 	duke_foots();
 	duke_waist();
 	duke_belt();
@@ -2378,12 +2385,12 @@ void display()
 	duke_right_hand();
 	duke_evo_sphere();
 
-	glPushMatrix();
+	glPushMatrix();//2
 	glRotatef(capeAngle, 1, 0, 0);
 	glTranslatef(0, capeY, capeZ);
 
-	glPopMatrix();
-	glPushMatrix();
+	glPopMatrix();//2
+	glPushMatrix();//3
 	//glTranslatef(1, 0, 0);
 	if (evo_success == true) {
 		duke_wing();
@@ -2392,28 +2399,19 @@ void display()
 		duke_cape();
 	}
 
-	glPopMatrix();
+	glPopMatrix();//3
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	//glRotatef(rotateCam, 0.01, 1, 0);
-	//glOrtho(-3, 3, -3, 3, -3, 3);
-	glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-
-	//--------------------------------
-	//	End of OpenGL drawing
-	//--------------------------------
-	glPopMatrix();
-
-
+	glPopMatrix();//4
 	glDisable(GL_LIGHT1);
-	glPushMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glOrtho(-zoom, zoom, -zoom, zoom, -zoom, zoom);
-	glPopMatrix();
+	
+	
+		
+
+
+	
+	
 }
+
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int nCmdShow)
 {
