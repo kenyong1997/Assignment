@@ -546,7 +546,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				zoom -= 1;
 		}
 		else if (wParam == 'S') {// Zoom out
+		
 			zoom += 1;
+			
 		}
 		else if (wParam == 'A') {// Camera turn left
 			rotateCam += 3;
